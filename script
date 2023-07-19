@@ -1,0 +1,47 @@
+var cc = DataStudioApp.createCommunityConnector();
+
+function getAuthType() {
+  var AuthTypes = cc.AuthType;
+  return cc
+    .newAuthTypeResponse()
+    .setAuthType(AuthTypes.KEY)
+    .build();
+}
+
+function isAuthValid() {
+  var userProperties = PropertiesService.getUserProperties();
+  var key = userProperties.getProperty('dscc.key');
+  var options =  {
+    accept: 'application/json',
+    revision: '2023-07-15',
+    'content-type': 'application/json',
+    Authorization: 'Klaviyo-API-Key '+ key,
+    'muteHttpExceptions': true
+  }
+  var res = UrlFetchApp.fetch("https://a.klaviyo.com/api/lists/", options)
+
+  return res.getResponseCode() == 200;
+}
+
+function setCredentials(request){
+  var key = request.key
+  var options =  {
+    accept: 'application/json',
+    revision: '2023-07-15',
+    'content-type': 'application/json',
+    Authorization: 'Klaviyo-API-Key '+ key,
+    'muteHttpExceptions': true
+  }
+  var res = UrlFetchApp.fetch("https://a.klaviyo.com/api/lists/", options)
+  if (res.getResponseCode() != 200){
+    return cc.newSetCredentialsResponse().setIsValid(false).build()
+  }else{
+
+    var userProperties = PropertiesService.getUserProperties()
+    userProperties.setProperty('desc.key',key)
+    return cc.newSetCredentialsResponse().setIsValid(true).build()
+  }
+
+
+
+}
